@@ -1,5 +1,45 @@
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import F, Count
+from django.db.models import Count
+
+
+def get_paths(bids):
+    histories = create_histories(bids)
+    paths = []
+    for history in histories:
+        path = [{"id": bid[1], "bid": bid[0], "comment": bid[2]}
+                for bid in zip(history[0][::-1], history[1][::-1], history[2][::-1])
+                ]
+        paths.append(path)
+    return paths
+
+
+def create_histories(bids):
+    histories = list(
+        bids.annotate(closure=Count("closure_ancestor", distinct=True),
+                      history=ArrayAgg(
+                          "closure_descendants__ancestor__name",
+                          ordering="closure_descendants__depth"),
+                      history_id=ArrayAgg(
+                          "closure_descendants__ancestor__id",
+                          ordering="closure_descendants__depth"),
+                      comments=ArrayAgg(
+                          "closure_descendants__ancestor__comment",
+                          ordering="closure_descendants__depth")
+                      )
+        .filter(closure=1)
+        .values_list("history", "history_id", "comments")
+    )
+    return histories
+
+
+def create_tree(bids):
+    histories = create_histories(bids)
+    used_nodes = {}
+    trees = []
+
+    for history in histories:
+        add_branch(zip(*history), used_nodes, trees)
+    return trees
 
 
 def add_branch(history, used_nodes, trees):
@@ -28,29 +68,3 @@ def extend_existing_tree(tree, pk, branch):
         return
     for node in tree["children"]:
         extend_existing_tree(node, pk, branch)
-
-
-def create_tree(bids):
-    histories = list(
-        bids.annotate(closure=Count("closure_ancestor", distinct=True),
-                      history=ArrayAgg(
-                          "closure_descendants__ancestor__name",
-                          ordering="closure_descendants__depth"),
-                      history_id=ArrayAgg(
-                          "closure_descendants__ancestor__id",
-                          ordering="closure_descendants__depth"),
-                      comments=ArrayAgg(
-                          "closure_descendants__ancestor__comment",
-                          ordering="closure_descendants__depth")
-                      )
-        .filter(closure=1)
-        .values_list("history", "history_id", "comments")
-    )
-
-    used_nodes = {}
-    trees = []
-
-    for history in histories:
-        add_branch(zip(*history), used_nodes, trees)
-
-    return trees
