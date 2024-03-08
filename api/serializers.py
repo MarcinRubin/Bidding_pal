@@ -17,6 +17,11 @@ class DealSerializerWithPaths(DealSerializer):
         return get_paths(bids)
 
 
+class DealSerializerForQuiz(DealSerializer):
+    class Meta(DealSerializer.Meta):
+        fields = ("id", "e", "w", "player")
+
+
 class BidSerializer(serializers.ModelSerializer):
     deal = DealSerializer(read_only=True)
 
@@ -25,17 +30,20 @@ class BidSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BidSerializerWithoutDeal(BidSerializer):
+    class Meta(BidSerializer.Meta):
+        fields = ("name", "comment")
+
+
 class BidSerializerAdd(BidSerializer):
     class Meta(BidSerializer.Meta):
         fields = ("name", "comment")
 
     def create(self, validated_data, **kwargs):
         bid_id = validated_data.pop("bid_id")
-        previous_bids = BidClosure.objects.filter(descendant__id=bid_id).order_by(
-            "depth")
+        previous_bids = BidClosure.objects.filter(descendant__id=bid_id).order_by("depth")
         validated_data.update({"deal": previous_bids[0].ancestor.deal})
         new_bid = Bid.objects.create(**validated_data)
-
         BidClosure.objects.create(ancestor=new_bid,
                                   descendant=new_bid,
                                   depth=0)

@@ -63,7 +63,6 @@ def add_branch(history, used_nodes, trees):
 
 def extend_existing_tree(tree, pk, branch):
     if tree["id"] == pk:
-        print(branch, pk)
         tree["children"].append(branch)
         return
     for node in tree["children"]:
