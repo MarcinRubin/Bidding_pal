@@ -32,7 +32,7 @@ class BidSerializer(serializers.ModelSerializer):
 
 class BidSerializerWithoutDeal(BidSerializer):
     class Meta(BidSerializer.Meta):
-        fields = ("name", "comment")
+        fields = ("name", "comment", "player")
 
 
 class BidSerializerAdd(BidSerializer):

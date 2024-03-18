@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'rest_framework',
     'corsheaders',
+    'django_filters',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -66,6 +67,9 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173'
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
 
 ROOT_URLCONF = 'bidding_pal.urls'
 

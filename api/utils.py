@@ -6,8 +6,8 @@ def get_paths(bids):
     histories = create_histories(bids)
     paths = []
     for history in histories:
-        path = [{"id": bid[1], "bid": bid[0], "comment": bid[2]}
-                for bid in zip(history[0][::-1], history[1][::-1], history[2][::-1])
+        path = [{"id": bid[1], "bid": bid[0], "comment": bid[2], "player": bid[3]}
+                for bid in zip(history[0], history[1], history[2], history[3])
                 ]
         paths.append(path)
     return paths
@@ -18,16 +18,18 @@ def create_histories(bids):
         bids.annotate(closure=Count("closure_ancestor", distinct=True),
                       history=ArrayAgg(
                           "closure_descendants__ancestor__name",
-                          ordering="closure_descendants__depth"),
+                          ordering="-closure_descendants__depth"),
                       history_id=ArrayAgg(
                           "closure_descendants__ancestor__id",
-                          ordering="closure_descendants__depth"),
+                          ordering="-closure_descendants__depth"),
                       comments=ArrayAgg(
                           "closure_descendants__ancestor__comment",
-                          ordering="closure_descendants__depth")
-                      )
-        .filter(closure=1)
-        .values_list("history", "history_id", "comments")
+                          ordering="-closure_descendants__depth"),
+                      players=ArrayAgg(
+                          "closure_descendants__ancestor__player",
+                          ordering="-closure_descendants__depth")
+                      ).filter(closure=1)
+        .values_list("history", "history_id", "comments", "players")
     )
     return histories
 

@@ -3,11 +3,13 @@ from api.models import Deal, Bid, BidClosure
 
 
 class Command(BaseCommand):
-    help = "Generate database from input files"
+    help = "Add data to database"
 
     def add_arguments(self, parser):
         parser.add_argument('directory', type=str,
                             help='Name of the directory in data sets folder')
+        parser.add_argument('category', type=str,
+                            help='Category of the deal set')
 
     def handle(self, *args, **kwargs):
         def extract_hand(path):
@@ -48,11 +50,8 @@ class Command(BaseCommand):
                 root_bid = current_bid
 
         dir = kwargs['directory']
-        self.stdout.write("Deleting old data...")
-        models = [Bid, BidClosure, Deal]
-        for m in models:
-            m.objects.all().delete()
-        self.stdout.write("Creating new database...")
+        category = kwargs['category']
+        self.stdout.write("Adding new data to database")
 
         with open(f"data_sets/{dir}/answers.csv", "r") as answers:
             biddings = []
@@ -65,7 +64,7 @@ class Command(BaseCommand):
         for i in range(len(biddings)):
             deal = Deal.objects.create(e=e_hands[i], w=w_hands[i], player="W",
                                        comment=f"{dir} - Rozdanie nr. {i + 1}",
-                                       category="Otwarcie 1H")
+                                       category=category)
             bid_sequence_save(biddings[i], deal)
 
-        self.stdout.write("done")
+        self.stdout.write("data added")
