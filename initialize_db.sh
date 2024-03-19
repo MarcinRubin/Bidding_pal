@@ -1,0 +1,10 @@
+python manage.py setup_db 1H_1S
+python manage.py add_to_db 1D "Otwarcie 1D"
+python manage.py add_to_db 1NT "Otwarcie 1NT"
+python manage.py add_to_db club_mixed "Otwarcie 1C - wszystkie"
+python manage.py add_to_db czwarty_kolor "Konwencja czwarty kolor"
+python manage.py add_to_db dwukolorowka "Dwukolorowki"
+python manage.py add_to_db karo-multi "2D multi"
+python manage.py add_to_db magister "Konwencja Magister"
+python manage.py add_to_db precision "2C - precision"
+python manage.py add_to_db strong_club "Sekwencja 1C - 1D"

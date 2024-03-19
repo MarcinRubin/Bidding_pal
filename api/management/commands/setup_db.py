@@ -65,7 +65,7 @@ class Command(BaseCommand):
         for i in range(len(biddings)):
             deal = Deal.objects.create(e=e_hands[i], w=w_hands[i], player="W",
                                        comment=f"{dir} - Rozdanie nr. {i + 1}",
-                                       category="Otwarcie 1H")
+                                       category="Otwarcia 1H i 1S")
             bid_sequence_save(biddings[i], deal)
 
         self.stdout.write("done")

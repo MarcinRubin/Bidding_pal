@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from api.models import Deal, Bid, BidClosure
+from django.db.utils import DataError
 
 
 class Command(BaseCommand):
@@ -62,9 +63,12 @@ class Command(BaseCommand):
             self.stdout.write("Answers and hands extracted")
 
         for i in range(len(biddings)):
-            deal = Deal.objects.create(e=e_hands[i], w=w_hands[i], player="W",
-                                       comment=f"{dir} - Rozdanie nr. {i + 1}",
+            try:
+                deal = Deal.objects.create(e=e_hands[i], w=w_hands[i], player="W",
+                                       comment=f"{category} - {i + 1}",
                                        category=category)
-            bid_sequence_save(biddings[i], deal)
+                bid_sequence_save(biddings[i], deal)
+            except DataError:
+                self.stdout.write(f"Probably incorrect number of card in hand-{i+1}")
 
         self.stdout.write("data added")
